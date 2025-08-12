@@ -3,12 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI 亲子计划助手 · Demo</title>
+<title>AI 亲子计划助手 · Debug</title>
 <link rel="stylesheet" href="style.css">
+<style>
+#debug { position: sticky; top:0; background:#fffbe6; border-bottom:1px solid #f0e68c; padding:8px 12px; font-family: monospace; }
+#debug b { color:#b00; }
+</style>
 </head>
 <body>
+<div id="debug">JS 状态：<span id="dbg-status">未加载</span> ｜ 版本：debug-1755032867
+  ｜ <button id="testBtn">点我测试按钮</button>
+  ｜ <a href="?reset=1">清空本地数据</a>
+</div>
+
 <header>
-  <h1>AI 亲子计划助手 · Demo</h1>
+  <h1>AI 亲子计划助手 · Debug 构建</h1>
   <nav>
     <button class="tab-btn active" data-tab="projects">项目</button>
     <button class="tab-btn" data-tab="tasks">任务</button>
@@ -19,7 +28,6 @@
 </header>
 
 <main>
-  <!-- Projects -->
   <section id="projects" class="tab active">
     <div class="panel">
       <h2>愿望清单</h2>
@@ -47,49 +55,25 @@
         <input id="openaiKey" placeholder="OpenAI API Key（可选）" style="flex:1;display:none;">
       </div>
       <p class="hint">选择一个项目后点击“AI 生成任务”。若不勾选“使用OpenAI”，将使用内置模板生成（离线，可演示）。</p>
-      <button id="genTasksBtn">AI 生成任务 → 加入任务表</button><small class="hint">（若未选择具体项目，将默认使用你最近新建的项目）</small>
+      <button id="genTasksBtn">AI 生成任务 → 加入任务表</button>
+      <small class="hint">（若未选择具体项目，将默认使用你最近新建的项目）</small>
     </div>
   </section>
 
-  <!-- Tasks -->
   <section id="tasks" class="tab">
     <div class="panel">
       <h2>任务清单（可拖拽到“今天”）</h2>
       <div id="taskList" class="cards droplist" data-drop="pool"></div>
     </div>
-    <div class="panel">
-      <details>
-        <summary>筛选</summary>
-        <div class="row">
-          <select id="filterProject"></select>
-          <select id="filterStatus">
-            <option value="all">全部</option>
-            <option value="todo">待做</option>
-            <option value="done">已完成</option>
-          </select>
-          <button id="clearDone" class="ghost">清除已完成</button>
-        </div>
-      </details>
-    </div>
   </section>
 
-  <!-- Today -->
   <section id="today" class="tab">
     <div class="panel">
       <h2>今日计划（番茄 25/5）</h2>
       <div class="lanes">
-        <div class="lane">
-          <h4>上午</h4>
-          <div id="lane-morning" class="droplist" data-drop="morning"></div>
-        </div>
-        <div class="lane">
-          <h4>下午</h4>
-          <div id="lane-afternoon" class="droplist" data-drop="afternoon"></div>
-        </div>
-        <div class="lane">
-          <h4>晚上</h4>
-          <div id="lane-evening" class="droplist" data-drop="evening"></div>
-        </div>
+        <div class="lane"><h4>上午</h4><div id="lane-morning" class="droplist" data-drop="morning"></div></div>
+        <div class="lane"><h4>下午</h4><div id="lane-afternoon" class="droplist" data-drop="afternoon"></div></div>
+        <div class="lane"><h4>晚上</h4><div id="lane-evening" class="droplist" data-drop="evening"></div></div>
       </div>
       <div class="row">
         <button id="autoPlan">自动生成今日计划</button>
@@ -100,9 +84,18 @@
 </main>
 
 <footer>
-  <small>本演示只用于展示交互思路。数据保存在浏览器本地（localStorage）。</small>
+  <small>Debug 版本：会在顶部显示 JS 加载状态与报错信息。</small>
 </footer>
 
-<script src="./app.js"></script>
+<script>
+// Debug helpers
+const dbg = document.getElementById('dbg-status');
+window.addEventListener('error', e=>{ dbg.innerHTML = '<b>脚本报错：</b>'+ e.message; });
+document.getElementById('testBtn').onclick = ()=> alert('JS 已加载，按钮事件可用！');
+
+// Show when app.js finished init
+window.__APP_READY__ = ()=>{ dbg.textContent = '已加载且运行'; };
+</script>
+<script defer src="./app.js?v=debug-1755032867"></script>
 </body>
 </html>
