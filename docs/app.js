@@ -69,6 +69,22 @@ document.getElementById('projectList').onclick = async (e)=>{
   }
 };
 
+// Global generate button on Projects tab
+const genBtn = document.getElementById('genTasksBtn');
+if(genBtn){
+  genBtn.onclick = async ()=>{
+    if(db.projects.length===0){
+      alert('请先新建一个项目，再生成任务。');
+      return;
+    }
+    // 默认使用最近创建的项目
+    const project = db.projects[db.projects.length-1];
+    await genTasksForProject(project);
+    // 切到“任务”页方便查看
+    document.querySelector('.tab-btn[data-tab="tasks"]').click();
+  };
+}
+
 // ===== AI generation (optional OpenAI) =====
 async function genTasksForProject(project){
   const age = parseInt(document.getElementById('childAge').value||'10',10);
@@ -79,7 +95,6 @@ async function genTasksForProject(project){
 
   let tasks = [];
   if(useOpenAI){
-    // Call OpenAI (browser fetch). Key is stored in memory only.
     try{
       const prompt = `你是学习教练。把“${project.title}”拆成6-10个具体小任务，每个任务给出：任务名、可交付物、建议时长(按${age}岁)、所需材料。难度水平：${level}。输出JSON数组，字段: title, deliverable, minutes`;
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -103,7 +118,6 @@ async function genTasksForProject(project){
     tasks = builtinGenerator(project.title, age, level);
   }
 
-  // write to db
   tasks.forEach(t=> db.tasks.push({
     id: crypto.randomUUID(),
     projectId: project.id,
@@ -115,7 +129,6 @@ async function genTasksForProject(project){
   alert('已生成任务：'+tasks.length+' 条');
   save();
 }
-
 
 function builtinGenerator(name, age, level){
   // 标准化关键词
@@ -177,47 +190,35 @@ function builtinGenerator(name, age, level){
   return math;
 }
 
-  ];
-  if(/英语|单词/i.test(name)) return [
-    {title:'单词卡片20个', deliverable:'测验截图', minutes:25},
-    {title:'听写10个', deliverable:'听写纸照片', minutes:25},
-    {title:'随文小练习', deliverable:'完成截图', minutes:25},
-    {title:'英文短文朗读', deliverable:'录音', minutes:25},
-    {title:'看英语动画', deliverable:'观后感', minutes:25}
-  ];
-  if(/运动|体育|锻炼/i.test(name)) return [
-    {title:'热身运动5分钟', deliverable:'视频', minutes:5},
-    {title:'跳绳100个', deliverable:'视频', minutes:10},
-    {title:'仰卧起坐20个', deliverable:'视频', minutes:10},
-    {title:'跑步10分钟', deliverable:'视频', minutes:10},
-    {title:'拉伸放松5分钟', deliverable:'视频', minutes:5}
-  ];
-
-  // simple rules for demo
-  const base = [
-    {title:'二位数加法口算20题', deliverable:'拍照答题纸', minutes:25},
-    {title:'减法退位口算15题', deliverable:'拍照答题纸', minutes:25},
-    {title:'乘法口诀复习 · 3/4/6/7', deliverable:'录音背诵', minutes:25},
-    {title:'单位换算：cm↔mm↔m 练习', deliverable:'完成表格', minutes:25},
-    {title:'几何：量角器读数10题', deliverable:'拍照练习', minutes:25}
-  ];
-  if(/读|书|阅读/i.test(name)) return [
-    {title:'阅读20分钟', deliverable:'阅读记录', minutes:25},
-    {title:'复述故事要点', deliverable:'语音/文字摘录', minutes:25},
-    {title:'生词卡片10个', deliverable:'拍照单词卡', minutes:25}
-  ];
-  if(/英语|单词/i.test(name)) return [
-    {title:'单词卡片20个', deliverable:'测验截图', minutes:25},
-    {title:'听写10个', deliverable:'听写纸照片', minutes:25},
-    {title:'随文小练习', deliverable:'完成截图', minutes:25}
-  ];
-  return base;
-}
-
 // ===== Tasks render & drag =====
 function renderTasks(){
   const wrap = document.getElementById('taskList');
   wrap.innerHTML='';
+  // Empty hint & one-click import
+  if(db.tasks.length===0){
+    const empty = document.createElement('div');
+    empty.className='panel';
+    empty.innerHTML = `<p class="hint">还没有任务：可以在“项目”里点击“AI 生成任务”，或一键导入示例。</p>
+    <button id="importSample">一键导入示例任务（数学/阅读/英语/运动）</button>`;
+    wrap.parentElement.insertBefore(empty, wrap);
+    empty.querySelector('#importSample').onclick = ()=>{
+      const sampleProjects = ['数学提升','阅读训练','英语单词500个','运动打卡'];
+      sampleProjects.forEach(title=>{
+        const p = {id: crypto.randomUUID(), title, due:'', priority:'high'};
+        db.projects.push(p);
+        builtinGenerator(title, 10, '中').forEach(t=> db.tasks.push({
+          id: crypto.randomUUID(),
+          projectId: p.id,
+          title: t.title,
+          deliverable: t.deliverable,
+          minutes: t.minutes,
+          status: 'todo'
+        }));
+      });
+      save();
+    };
+  }
+
   const pid = document.getElementById('filterProject').value || 'all';
   const fs = document.getElementById('filterStatus').value || 'all';
   db.tasks
