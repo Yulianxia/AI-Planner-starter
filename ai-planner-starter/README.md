@@ -34,6 +34,7 @@ ai-planner-starter/
 ## 页面流程图（Mermaid）
 > 完整版在 **docs/index.md**，这里给一个简版预览。
 
+```mermaid
 flowchart TD
   A["首次使用 / Onboarding"] --> B["项目列表 / Projects"]
   B --> C["新建项目"]
@@ -46,7 +47,7 @@ flowchart TD
   E --> J["日历导出（Google / Notion）"]
   A --> K["设置：年龄 / 水平 / 每日上限"]
   K --> F
-
+```
 ---
 
 ## 许可
