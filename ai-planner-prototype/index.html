@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 周计划助手</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>AI 周计划助手</h1>
+    <div id="app">
+        <!-- 项目输入页 -->
+        <section id="project-input">
+            <h2>创建项目</h2>
+            <label>项目名称：<input id="project-name"></label><br>
+            <label>孩子年龄：<input id="child-age" type="number"></label><br>
+            <label>年级：<input id="child-grade"></label><br>
+            <label>教材版本：<input id="child-book"></label><br>
+            <label>目标：<input id="child-goal"></label><br>
+            <button onclick="generateTasks()">生成 AI 任务建议</button>
+        </section>
+
+        <!-- AI 任务页 -->
+        <section id="task-suggestions" style="display:none;">
+            <h2>AI 任务建议</h2>
+            <ul id="task-list"></ul>
+            <button onclick="createWeeklyPlan()">生成周计划</button>
+        </section>
+
+        <!-- 周计划表 -->
+        <section id="weekly-plan" style="display:none;">
+            <h2>周计划表</h2>
+            <div id="week-grid" class="grid"></div>
+        </section>
+
+        <!-- 打卡页 -->
+        <section id="task-execution" style="display:none;">
+            <h2>任务执行</h2>
+            <div id="current-task"></div>
+            <button onclick="startPomodoro()">开始番茄钟</button>
+            <div id="timer"></div>
+        </section>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
