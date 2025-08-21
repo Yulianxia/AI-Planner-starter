@@ -1,120 +1,45 @@
-<!doctype html>
-<html lang="zh-CN">
+<!DOCTYPE html>
+<html lang="zh">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI 亲子计划助手 · 交互原型</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>AI 周计划助手</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <h1>AI 亲子计划助手 · 交互原型</h1>
-  <nav>
-    <button class="tab-btn active" data-tab="projects">项目</button>
-    <button class="tab-btn" data-tab="tasks">任务</button>
-    <button class="tab-btn" data-tab="calendar">日历</button>
-    <button class="tab-btn" data-tab="stats">统计</button>
-    <button id="exportBtn" class="ghost">导出备份</button>
-  </nav>
-</header>
+    <h1>AI 周计划助手</h1>
+    <div id="app">
+        <!-- 项目输入页 -->
+        <section id="project-input">
+            <h2>创建项目</h2>
+            <label>项目名称：<input id="project-name"></label><br>
+            <label>孩子年龄：<input id="child-age" type="number"></label><br>
+            <label>年级：<input id="child-grade"></label><br>
+            <label>教材版本：<input id="child-book"></label><br>
+            <label>目标：<input id="child-goal"></label><br>
+            <button onclick="generateTasks()">生成 AI 任务建议</button>
+        </section>
 
-<main>
-  <!-- Projects -->
-  <section id="projects" class="tab active">
-    <div class="panel">
-      <h2>创建项目</h2>
-      <form id="projectForm" class="col">
-        <div class="row">
-          <input required id="pTitle" placeholder="项目名称：如 数学提升 / 英语口语 / 阅读计划">
-          <input id="pDue" type="date" placeholder="截止日期">
-          <select id="pPriority">
-            <option value="high">优先级：高</option>
-            <option value="medium">优先级：中</option>
-            <option value="low">优先级：低</option>
-          </select>
-        </div>
-        <div class="row">
-          <input id="childName" placeholder="孩子姓名（可选）" style="max-width:180px">
-          <input id="childAge" type="number" min="5" max="18" value="10" style="max-width:120px" placeholder="年龄">
-          <select id="level">
-            <option>低</option><option selected>中</option><option>高</option>
-          </select>
-          <select id="subjects" multiple size="3" title="选择学科（可多选）">
-            <option value="数学" selected>数学</option>
-            <option value="阅读">阅读</option>
-            <option value="英语">英语</option>
-            <option value="运动">运动</option>
-            <option value="科学">科学</option>
-          </select>
-        </div>
-        <textarea id="pGoal" placeholder="项目目标（例如：掌握两位数乘法；每天阅读20分钟；三周完成口语小演讲）"></textarea>
-        <div class="row">
-          <button type="submit">+ 新建项目</button>
-          <button type="button" id="genTasksBtn">AI 建议任务（进入确认）</button>
-        </div>
-      </form>
+        <!-- AI 任务页 -->
+        <section id="task-suggestions" style="display:none;">
+            <h2>AI 任务建议</h2>
+            <ul id="task-list"></ul>
+            <button onclick="createWeeklyPlan()">生成周计划</button>
+        </section>
+
+        <!-- 周计划表 -->
+        <section id="weekly-plan" style="display:none;">
+            <h2>周计划表</h2>
+            <div id="week-grid" class="grid"></div>
+        </section>
+
+        <!-- 打卡页 -->
+        <section id="task-execution" style="display:none;">
+            <h2>任务执行</h2>
+            <div id="current-task"></div>
+            <button onclick="startPomodoro()">开始番茄钟</button>
+            <div id="timer"></div>
+        </section>
     </div>
-
-    <div class="panel">
-      <h3>项目列表</h3>
-      <div id="projectList" class="cards"></div>
-    </div>
-
-    <dialog id="aiDialog">
-      <form method="dialog" class="dialog">
-        <h3>AI 任务建议（可编辑后确认）</h3>
-        <div id="aiTaskList" class="cards"></div>
-        <div class="row">
-          <button value="cancel" class="ghost">取消</button>
-          <button id="confirmAi">确认加入任务表</button>
-        </div>
-      </form>
-    </dialog>
-  </section>
-
-  <!-- Tasks -->
-  <section id="tasks" class="tab">
-    <div class="panel">
-      <h2>任务清单（可拖拽到日历）</h2>
-      <div id="taskList" class="cards droplist" data-drop="pool"></div>
-    </div>
-    <div class="panel">
-      <div class="row">
-        <select id="filterProject"></select>
-        <select id="filterStatus">
-          <option value="all">全部</option>
-          <option value="todo">待做</option>
-          <option value="done">已完成</option>
-        </select>
-        <button id="clearDone" class="ghost">清除已完成</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Calendar -->
-  <section id="calendar" class="tab">
-    <div class="panel">
-      <h2>本周日历（拖任务到某一天）</h2>
-      <div class="week">
-        <div class="day"><h4>08/13 二</h4><div class="droplist" data-drop="day-2025-08-13"></div></div><div class="day"><h4>08/14 三</h4><div class="droplist" data-drop="day-2025-08-14"></div></div><div class="day"><h4>08/15 四</h4><div class="droplist" data-drop="day-2025-08-15"></div></div><div class="day"><h4>08/16 五</h4><div class="droplist" data-drop="day-2025-08-16"></div></div><div class="day"><h4>08/17 日</h4><div class="droplist" data-drop="day-2025-08-17"></div></div><div class="day"><h4>08/18 日</h4><div class="droplist" data-drop="day-2025-08-18"></div></div><div class="day"><h4>08/19 一</h4><div class="droplist" data-drop="day-2025-08-19"></div></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Stats -->
-  <section id="stats" class="tab">
-    <div class="panel">
-      <h2>统计</h2>
-      <p>完成任务数：<strong id="doneCount">0</strong> / 全部任务数：<strong id="allCount">0</strong></p>
-      <div id="byProject" class="tags"></div>
-    </div>
-  </section>
-</main>
-
-<footer>
-  <small>此原型用于验证交互思路：项目 → AI 建议 → 人类确认 → 任务池 → 日历安排 → 打卡统计。数据保存在浏览器本地。</small>
-</footer>
-
-<script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
